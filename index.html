@@ -1,0 +1,558 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الحروف الذكية ⚡️</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background: linear-gradient(270deg, #ff512f, #dd2476);
+            background-size: 400% 400%;
+            animation: animateBG 5s infinite alternate; 
+            color: white;
+        }
+
+        @keyframes animateBG {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .container { 
+            width: 90%; max-width: 600px; 
+            margin: auto; background: rgba(0, 0, 0, 0.7); 
+            padding: 20px; border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); 
+        }
+
+        h1, h2, h3 { margin-bottom: 10px; }
+        #timer { font-size: 22px; font-weight: bold; color: yellow; }
+        progress { 
+            width: 100%; 
+            height: 20px; 
+            margin-top: 10px; 
+            border-radius: 5px; 
+        }
+        progress::-webkit-progress-value { background: #28a745; }
+        progress::-moz-progress-bar { background: #28a745; }
+
+        .input-group { margin: 15px 0; text-align: right; }
+        label { font-size: 18px; font-weight: bold; display: block; margin-bottom: 5px; }
+        
+        input { 
+            width: 100%; padding: 15px; font-size: 20px; 
+            text-align: center; border: 3px solid #ddd; border-radius: 10px; 
+            transition: all 0.3s ease-in-out;
+        }
+
+        input:focus {
+            border-color: yellow;
+            box-shadow: 0 0 10px yellow;
+            outline: none;
+        }
+
+        .correct { background-color: lightgreen; }
+        .wrong { background-color: lightcoral; }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        button { 
+            padding: 12px; font-size: 18px; cursor: pointer; 
+            border: none; border-radius: 5px; 
+            background-color: #28a745; color: white;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover { background-color: #218838; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 20px;
+            display: none;
+            animation: fadeInOut 3s;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        #newLetter {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        #emailDisplay {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+
+        #roundInfo {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #scoresPage {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            width: 80%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        #scoresList {
+            list-style: none;
+            padding: 0;
+            text-align: right;
+        }
+
+        #scoresList li {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>لعبة الحروف الذكية ⚡️</h1>
+        <h2>أعطني اسم يبدأ بحرف: <span id="letter"></span></h2>
+        <h3 id="timer">الوقت المتبقي: <span id="time">120</span> ثانية</h3>
+        <progress id="timeProgress" max="120" value="120"></progress>
+        <h3 id="totalScore">إجمالي النقاط: 0</h3>
+        <div id="roundInfo">الجولة: 1</div>
+
+        <div class="input-group"><label>🏳️ بلد:</label> <input type="text" id="country"></div>
+        <div class="input-group"><label>🐅 حيوان:</label> <input type="text" id="animal"></div>
+        <div class="input-group"><label>👦 اسم ولد:</label> <input type="text" id="boy"></div>
+        <div class="input-group"><label>👧 اسم بنت:</label> <input type="text" id="girl"></div>
+        <div class="input-group"><label>🔨 جماد:</label> <input type="text" id="object"></div>
+        <div class="input-group"><label>🏙️ مدينة:</label> <input type="text" id="city"></div>
+        <div class="input-group"><label>🍏 فاكهة:</label> <input type="text" id="fruit"></div>
+        <div class="input-group"><label>👨‍💼 وظيفة:</label> <input type="text" id="job"></div>
+        <div class="input-group"><label>🍲 أكلة:</label> <input type="text" id="food"></div>
+
+        <div class="button-group">
+            <button onclick="checkAnswers()">✅ تحقق من الإجابات</button>
+            <button onclick="startNewRound()">🔄 جولة جديدة</button>
+            <button id="pauseButton" onclick="pauseTimer()">⏸️ إيقاف الزمن</button>
+            <button id="resumeButton" onclick="resumeTimer()" style="display: none;">▶️ استئناف الزمن</button>
+            <button onclick="copyEmail()">📩 إرسال اقتراح</button>
+            <button onclick="showScores()">📊 عرض النتائج</button>
+            <button id="buyAnswer" onclick="buyAnswer()">💡 شراء إجابة (50 نقطة)</button>
+            <button id="hintButton" onclick="getHint()">ℹ️ تلميح مجاني</button>
+        </div>
+
+        <h3 id="result"></h3>
+    </div>
+
+    <div class="message" id="messageBox"></div>
+    <div id="newLetter"></div>
+    <div id="emailDisplay"></div>
+    <div id="scoresPage">
+        <h2>آخر 10 نتائج</h2>
+        <ul id="scoresList"></ul>
+        <button onclick="hideScores()">إغلاق</button>
+    </div>
+
+    <!-- الأصوات الجديدة من الإنترنت -->
+    <audio id="correctSound" preload="auto" src="https://cdn.pixabay.com/audio/2023/08/31/09-47-07-614_1.mp3"></audio>
+    <audio id="wrongSound" preload="auto" src="https://cdn.pixabay.com/audio/2023/08/31/09-47-07-615_1.mp3"></audio>
+    <audio id="timeUpSound" preload="auto" src="https://cdn.pixabay.com/audio/2023/08/31/09-47-07-616_1.mp3"></audio>
+    <audio id="newRoundSound" preload="auto" src="https://cdn.pixabay.com/audio/2023/08/31/09-47-07-617_1.mp3"></audio>
+
+    <script>
+        let timeLeft;
+        let timerInterval;
+        let letters = "أبتثجحخدذرزسشصضطظعغفقكلمنهوي";
+        let chosenLetter;
+        let lastScore = 0;
+        let round = 1;
+        let initialTime = 120;
+        let isPaused = false;
+        let scores = [];
+        let totalScore = 0;
+        let hintUsed = false;
+
+        const correctSound = document.getElementById("correctSound");
+        const wrongSound = document.getElementById("wrongSound");
+        const timeUpSound = document.getElementById("timeUpSound");
+        const newRoundSound = document.getElementById("newRoundSound");
+
+        [correctSound, wrongSound, timeUpSound, newRoundSound].forEach(sound => {
+            sound.load();
+            sound.onerror = () => console.error(`فشل تحميل الصوت: ${sound.src}`);
+        });
+
+        const helpAnswers = {
+            "أ": { country: "أفغانستان", animal: "أرنب", boy: "أحمد", girl: "أسماء", object: "أبريق", city: "أبوظبي", fruit: "أناناس", job: "أستاذ", food: "أرز" },
+            "ب": { country: "بلجيكا", animal: "بطريق", boy: "باسم", girl: "بسمة", object: "باب", city: "بغداد", fruit: "بطيخ", job: "بائع", food: "بيتزا" },
+            "ت": { country: "تونس", animal: "تمساح", boy: "تامر", girl: "تسنيم", object: "تلفاز", city: "طنطا", fruit: "تفاح", job: "طبيب", food: "تبولة" },
+            "ث": { country: "ثورة", animal: "ثعلب", boy: "ثامر", girl: "ثناء", object: "ثلاجة", city: "ثول", fruit: "ثمرة", job: "ثروة", food: "ثوم" },
+            "ج": { country: "جيبوتي", animal: "جمل", boy: "جمال", girl: "جويرية", object: "جرس", city: "جدة", fruit: "جوافة", job: "جزار", food: "جبن" },
+            "ح": { country: "حضرموت", animal: "حصان", boy: "حامد", girl: "حليمة", object: "حبل", city: "حلب", fruit: "حبحب", job: "حارس", food: "حلاوة" },
+            "خ": { country: "خراسان", animal: "خروف", boy: "خالد", girl: "خديجة", object: "خاتم", city: "خميس", fruit: "خوخ", job: "خباز", food: "خبز" },
+            "د": { country: "دنمارك", animal: "دب", boy: "داوود", girl: "داليا", object: "دولاب", city: "دمشق", fruit: "دوم", job: "دليل", food: "دجاج" },
+            "ذ": { country: "ذمار", animal: "ذئب", boy: "ذياب", girl: "ذكرى", object: "ذراع", city: "ذهبان", fruit: "ذرة", job: "ذهبي", food: "ذرة" },
+            "ر": { country: "روسيا", animal: "رقش", boy: "رامي", girl: "ريم", object: "راديو", city: "رباط", fruit: "رمان", job: "رسام", food: "رز" },
+            "ز": { country: "زامبيا", animal: "زرافة", boy: "زياد", girl: "زينب", object: "زجاج", city: "زنجبار", fruit: "زيتون", job: "زبون", food: "زبادي" },
+            "س": { country: "سوريا", animal: "سمكة", boy: "سامي", girl: "سارة", object: "سرير", city: "سلا", fruit: "سفرجل", job: "سائق", food: "سمك" },
+            "ش": { country: "شيلي", animal: "شبل", boy: "شادي", girl: "شيماء", object: "شمعة", city: "شرم", fruit: "شمام", job: "شاعر", food: "شاورما" },
+            "ص": { country: "صومال", animal: "صقر", boy: "صالح", girl: "صفاء", object: "صندوق", city: "صنعاء", fruit: "صبار", job: "صياد", food: "صيادية" },
+            "ض": { country: "ضوران", animal: "ضبع", boy: "ضياء", girl: "ضحى", object: "ضوء", city: "ضبا", fruit: "ضريع", job: "ضابط", food: "ضلع" },
+            "ط": { country: "طاجيكستان", animal: "طاووس", boy: "طارق", girl: "طيبة", object: "طاولة", city: "طرابلس", fruit: "طماطم", job: "طيار", food: "طعمية" },
+            "ظ": { country: "ظفار", animal: "ظبي", boy: "ظافر", girl: "ظلال", object: "ظرف", city: "ظلم", fruit: "ظلط", job: "ظابط", food: "ظبي" },
+            "ع": { country: "عمان", animal: "عقرب", boy: "عمر", girl: "عائشة", object: "عجلة", city: "عدن", fruit: "عنب", job: "عالم", food: "عدس" },
+            "غ": { country: "غانا", animal: "غزال", boy: "غسان", girl: "غادة", object: "غطاء", city: "غزة", fruit: "غار", job: "غواص", food: "غداء" },
+            "ف": { country: "فنلندا", animal: "فيل", boy: "فارس", girl: "فاطمة", object: "فأس", city: "فاس", fruit: "فراولة", job: "فنان", food: "فلافل" },
+            "ق": { country: "قطر", animal: "قرد", boy: "قاسم", girl: "قمر", object: "قلم", city: "القاهرة", fruit: "قرع", job: "قاضي", food: "قهوة" },
+            "ك": { country: "كندا", animal: "كلب", boy: "كريم", girl: "كوثر", object: "كرسي", city: "كوالالمبور", fruit: "كيوي", job: "كاتب", food: "كباب" },
+            "ل": { country: "لبنان", animal: "لبؤة", boy: "لؤي", girl: "لمى", object: "لوح", city: "لندن", fruit: "ليمون", job: "لص", food: "لبن" },
+            "م": { country: "مصر", animal: "ماعز", boy: "محمد", girl: "مريم", object: "مفتاح", city: "مكة", fruit: "مانجو", job: "ممرض", food: "مكرونة" },
+            "ن": { country: "نيجيريا", animal: "نمر", boy: "ناصر", girl: "نور", object: "نجمة", city: "نابلس", fruit: "نارنج", job: "نجار", food: "نقانق" },
+            "ه": { country: "هولندا", animal: "هدهد", boy: "هاني", girl: "هبة", object: "هاتف", city: "هامبورغ", fruit: "هندي", job: "هندسي", food: "همبرغر" },
+            "و": { country: "ويلز", animal: "وزة", boy: "وسام", girl: "وفاء", object: "ورق", city: "وهران", fruit: "ورد", job: "وزير", food: "ورقة" },
+            "ي": { country: "يمن", animal: "يمامة", boy: "ياسر", girl: "ياسمين", object: "يخت", city: "يافا", fruit: "يوسفي", job: "يوغا", food: "يخنة" }
+        };
+
+        function startGame() {
+            document.getElementById("result").textContent = "";
+            document.querySelectorAll("input").forEach(input => {
+                input.value = "";
+                input.classList.remove("correct", "wrong");
+                input.disabled = false;
+            });
+
+            chosenLetter = letters[Math.floor(Math.random() * letters.length)];
+            document.getElementById("letter").textContent = chosenLetter;
+
+            const newLetterDiv = document.getElementById("newLetter");
+            newLetterDiv.textContent = chosenLetter;
+            newLetterDiv.style.display = "block";
+            newRoundSound.play().catch(e => console.error("خطأ في تشغيل صوت الجولة الجديدة:", e));
+            setTimeout(() => {
+                newLetterDiv.style.display = "none";
+            }, 2000);
+
+            timeLeft = initialTime;
+            document.getElementById("time").textContent = timeLeft;
+            document.getElementById("timeProgress").value = timeLeft;
+            document.getElementById("timeProgress").max = initialTime;
+            document.getElementById("roundInfo").textContent = `الجولة: ${round}`;
+            document.getElementById("totalScore").textContent = `إجمالي النقاط: ${totalScore}`;
+            document.getElementById("buyAnswer").disabled = totalScore < 50 || !helpAnswers[chosenLetter];
+            document.getElementById("hintButton").disabled = false;
+            hintUsed = false;
+            clearInterval(timerInterval);
+            isPaused = false;
+            document.getElementById("pauseButton").style.display = "inline";
+            document.getElementById("resumeButton").style.display = "none";
+
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    document.getElementById("time").textContent = timeLeft;
+                    document.getElementById("timeProgress").value = timeLeft;
+                    if (timeLeft === 0) {
+                        clearInterval(timerInterval);
+                        timeUpSound.play().catch(e => console.error("خطأ في تشغيل صوت انتهاء الوقت:", e));
+                        checkAnswers();
+                    }
+                }
+            }, 1000);
+        }
+
+        function startNewRound() {
+            startGame();
+        }
+
+        function pauseTimer() {
+            if (!isPaused) {
+                isPaused = true;
+                document.querySelectorAll("input").forEach(input => {
+                    input.disabled = true;
+                });
+                document.getElementById("pauseButton").style.display = "none";
+                document.getElementById("resumeButton").style.display = "inline";
+                showMessage("⏸️ الزمن متوقف الآن!", 2000);
+            }
+        }
+
+        function resumeTimer() {
+            if (isPaused) {
+                isPaused = false;
+                document.querySelectorAll("input").forEach(input => {
+                    input.disabled = false;
+                });
+                document.getElementById("pauseButton").style.display = "inline";
+                document.getElementById("resumeButton").style.display = "none";
+            }
+        }
+
+        document.querySelectorAll("input").forEach(input => {
+            input.addEventListener("keydown", function(event) {
+                if (isPaused) {
+                    event.preventDefault();
+                    showMessage("لا يمكنك الكتابة أثناء إيقاف الزمن!", 2000);
+                }
+            });
+        });
+
+        function startsWithLetter(word, letter) {
+            const firstChar = word.charAt(0);
+            if (firstChar === letter) {
+                return true;
+            }
+            if ((letter === "ا" && firstChar === "أ") || (letter === "أ" && firstChar === "ا")) {
+                return true;
+            }
+            return false;
+        }
+
+        async function isValidWord(word) {
+            if (word.length <= 1) {
+                return false;
+            }
+            if (chosenLetter === "ح" && 
+                (word === "حامد" || word === "حليمة" || word === "حنان")) {
+                return true;
+            }
+            try {
+                const response = await fetch(
+                    `https://ar.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(word)}&format=json&origin=*`
+                );
+                const data = await response.json();
+                const pages = data.query.pages;
+                for (let pageId in pages) {
+                    if (pages[pageId].missing === undefined) {
+                        return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error("خطأ في التحقق من الكلمة:", error);
+                return false;
+            }
+        }
+
+        async function checkAnswers() {
+            if (isPaused) {
+                showMessage("لا يمكنك التحقق أثناء إيقاف الزمن!", 2000);
+                return;
+            }
+
+            let userInputs = {
+                country: document.getElementById("country").value.trim(),
+                animal: document.getElementById("animal").value.trim(),
+                boy: document.getElementById("boy").value.trim(),
+                girl: document.getElementById("girl").value.trim(),
+                object: document.getElementById("object").value.trim(),
+                city: document.getElementById("city").value.trim(),
+                fruit: document.getElementById("fruit").value.trim(),
+                job: document.getElementById("job").value.trim(),
+                food: document.getElementById("food").value.trim()
+            };
+
+            const allEmpty = Object.values(userInputs).every(input => input === "");
+            if (allEmpty) {
+                showMessage("📝 يرجى إدخال بعض الكلمات أولاً!", 2000);
+                return;
+            }
+
+            clearInterval(timerInterval);
+            let score = 0;
+
+            for (let category in userInputs) {
+                let userInput = userInputs[category];
+                if (startsWithLetter(userInput, chosenLetter)) {
+                    const isValid = await isValidWord(userInput);
+                    if (isValid) {
+                        document.getElementById(category).classList.add("correct");
+                        score++;
+                        correctSound.play().catch(e => console.error("خطأ في تشغيل صوت الإجابة الصحيحة:", e));
+                    } else {
+                        document.getElementById(category).classList.add("wrong");
+                        wrongSound.play().catch(e => console.error("خطأ في تشغيل صوت الإجابة الخاطئة:", e));
+                    }
+                } else {
+                    document.getElementById(category).classList.add("wrong");
+                    wrongSound.play().catch(e => console.error("خطأ في تشغيل صوت الإجابة الخاطئة:", e));
+                }
+            }
+
+            lastScore = score;
+            totalScore += score * 10;
+            if (score === 9) totalScore += 20;
+            document.getElementById("result").textContent = `نتيجتك: ${score} من 9 🎯`;
+            document.getElementById("totalScore").textContent = `إجمالي النقاط: ${totalScore}`;
+            document.getElementById("buyAnswer").disabled = totalScore < 50 || !helpAnswers[chosenLetter];
+
+            let levelMessage = "";
+            if (totalScore >= 300) levelMessage = "🎖️ وصلت إلى مستوى المحترف!";
+            else if (totalScore >= 100) levelMessage = "🏅 وصلت إلى مستوى المتوسط!";
+            else if (totalScore >= 50) levelMessage = "🌟 وصلت إلى مستوى المبتدئ!";
+
+            showMessage(score >= 5 ? "🌟 رائع! لديك ذكاء فائق!" + (levelMessage ? "\n" + levelMessage : "") : "📖 حاول تحسين معرفتك بالقراءة!" + (levelMessage ? "\n" + levelMessage : ""), 3000);
+
+            scores.unshift(`الجولة ${round} - الحرف: ${chosenLetter} - النتيجة: ${score}/9 - النقاط: ${score * 10 + (score === 9 ? 20 : 0)}`);
+            if (scores.length > 10) scores.pop();
+
+            round++;
+            if (initialTime > 45) {
+                initialTime -= 5;
+            }
+        }
+
+        function buyAnswer() {
+            if (totalScore < 50) {
+                showMessage("❌ نقاطك غير كافية! تحتاج 50 نقطة على الأقل.", 2000);
+                return;
+            }
+            if (!helpAnswers[chosenLetter]) {
+                showMessage("❌ لا توجد إجابات مساعدة لهذا الحرف بعد!", 2000);
+                return;
+            }
+
+            let userInputs = {
+                country: document.getElementById("country"),
+                animal: document.getElementById("animal"),
+                boy: document.getElementById("boy"),
+                girl: document.getElementById("girl"),
+                object: document.getElementById("object"),
+                city: document.getElementById("city"),
+                fruit: document.getElementById("fruit"),
+                job: document.getElementById("job"),
+                food: document.getElementById("food")
+            };
+
+            const emptyFields = Object.entries(userInputs).filter(([_, input]) => input.value.trim() === "");
+            if (emptyFields.length === 0) {
+                showMessage("📋 لا توجد حقول فارغة لملئها!", 2000);
+                return;
+            }
+
+            const [category, input] = emptyFields[Math.floor(Math.random() * emptyFields.length)];
+            const answer = helpAnswers[chosenLetter][category];
+            input.value = answer;
+            totalScore -= 50;
+            document.getElementById("totalScore").textContent = `إجمالي النقاط: ${totalScore}`;
+            document.getElementById("buyAnswer").disabled = totalScore < 50;
+            showMessage(`💡 تم شراء إجابة لـ "${category}": ${answer}`, 2000);
+        }
+
+        function getHint() {
+            if (hintUsed) {
+                showMessage("⚠️ لقد استخدمت التلميح المجاني لهذه الجولة!", 2000);
+                return;
+            }
+
+            let userInputs = {
+                country: document.getElementById("country"),
+                animal: document.getElementById("animal"),
+                boy: document.getElementById("boy"),
+                girl: document.getElementById("girl"),
+                object: document.getElementById("object"),
+                city: document.getElementById("city"),
+                fruit: document.getElementById("fruit"),
+                job: document.getElementById("job"),
+                food: document.getElementById("food")
+            };
+
+            const emptyFields = Object.entries(userInputs).filter(([_, input]) => input.value.trim() === "");
+            if (emptyFields.length === 0) {
+                showMessage("📋 لا توجد حقول فارغة لإعطائك تلميح!", 2000);
+                return;
+            }
+
+            const [category, input] = emptyFields[Math.floor(Math.random() * emptyFields.length)];
+            const hint = helpAnswers[chosenLetter][category];
+            input.value = hint;
+            hintUsed = true;
+            document.getElementById("hintButton").disabled = true;
+            showMessage(`ℹ️ تم إضافة تلميح لـ "${category}"`, 2000);
+        }
+
+        function showMessage(text, duration) {
+            let messageBox = document.getElementById("messageBox");
+            messageBox.textContent = text;
+            messageBox.style.display = "block";
+            setTimeout(() => messageBox.style.display = "none", duration);
+        }
+
+        function copyEmail() {
+            const email = "qmta80@gmail.com";
+            const emailDisplay = document.getElementById("emailDisplay");
+            emailDisplay.textContent = "انسخ البريد: " + email;
+            emailDisplay.style.display = "block";
+            setTimeout(() => {
+                emailDisplay.style.display = "none";
+            }, 5000);
+
+            navigator.clipboard.writeText(email).then(() => {
+                alert("تم نسخ البريد: " + email + "\n📬 ارسل اقتراحك الجميل الآن!");
+            }).catch(err => {
+                alert("حدث خطأ! انسخ البريد يدويًا: " + email);
+            });
+        }
+
+        function showScores() {
+            const scoresList = document.getElementById("scoresList");
+            scoresList.innerHTML = "";
+            scores.forEach(score => {
+                const li = document.createElement("li");
+                li.textContent = score;
+                scoresList.appendChild(li);
+            });
+            document.getElementById("scoresPage").style.display = "block";
+        }
+
+        function hideScores() {
+            document.getElementById("scoresPage").style.display = "none";
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
