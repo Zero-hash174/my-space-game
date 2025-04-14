@@ -156,6 +156,118 @@
     </style>
 </head>
 <body>
+
+<style>
+#inspirationButton {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 28px;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  z-index: 10001;
+}
+
+#inspirationModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 30px;
+  border-radius: 15px;
+  font-size: 20px;
+  max-width: 90%;
+  text-align: center;
+  z-index: 10000;
+}
+
+#inspirationModal button {
+  margin-top: 20px;
+  background: #28a745;
+  border: none;
+  padding: 10px 20px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+</style>
+
+<button id="inspirationButton">#</button>
+<div id="inspirationModal">
+  <p>🎉 هذه اللعبة تم إنشاؤها باستخدام الذكاء الاصطناعي!<br><br>
+  🚀 يمكنك أنت أيضًا أن تبتكر ألعابًا أفضل وأذكى، كل ما تحتاجه هو خيالك، وإيمانك بقدرتك على التعلم والتطوير.<br><br>
+  🌟 لا تنتظر الغد... ابدأ اليوم!<br><br>
+  تحية طيبة من "سلة غذاء العالم" ❤️</p>
+  <button onclick="document.getElementById('inspirationModal').style.display='none'">حسناً</button>
+</div>
+
+<script>
+document.getElementById("inspirationButton").onclick = function () {
+  document.getElementById("inspirationModal").style.display = "block";
+};
+</script>
+
+<style>
+#loadingScreen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: #000;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  z-index: 9999;
+}
+</style>
+<div id="loadingScreen">🔄 جاري تحميل اللعبة...</div>
+<script>
+window.addEventListener("load", function () {
+  document.getElementById("loadingScreen").style.display = "none";
+});
+</script>
+
+<style>
+#landingScreen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: linear-gradient(270deg, #ff512f, #dd2476);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 9998;
+}
+#startGameButton {
+  background: #28a745;
+  border: none;
+  padding: 15px 30px;
+  font-size: 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+</style>
+<div id="landingScreen">
+  <h1>🎉 مرحبًا بك في لعبة الحروف الذكية</h1>
+  <p>اختبر ذكاءك في لعبة تبدأ بحرف! 🧠</p>
+  <button id="startGameButton">ابدأ اللعب</button>
+</div>
+<script>
+document.getElementById("startGameButton").onclick = function () {
+  document.getElementById("landingScreen").style.display = "none";
+  startGame();
+};
+</script>
+
     <div class="container">
         <h1>لعبة الحروف الذكية ⚡️</h1>
         <h2>أعطني اسم يبدأ بحرف: <span id="letter"></span></h2>
@@ -198,10 +310,10 @@
     </div>
 
     <!-- الأصوات الجديدة من الإنترنت -->
-    <audio id="correctSound" preload="auto" src="https://cdn.pixabay.com/audio/2023/08/31/09-47-07-614_1.mp3"></audio>
-    <audio id="wrongSound" preload="auto" src="https://cdn.pixabay.com/audio/2023/08/31/09-47-07-615_1.mp3"></audio>
-    <audio id="timeUpSound" preload="auto" src="https://cdn.pixabay.com/audio/2023/08/31/09-47-07-616_1.mp3"></audio>
-    <audio id="newRoundSound" preload="auto" src="https://cdn.pixabay.com/audio/2023/08/31/09-47-07-617_1.mp3"></audio>
+    <audio id="correctSound" preload="auto" src="good.mp3"></audio>
+    <audio id="wrongSound" preload="auto" src="error.mp3"></audio>
+    <audio id="timeUpSound" preload="auto" src="tim.mp3"></audio>
+    <audio id="newRoundSound" preload="auto" src="go.mp3"></audio>
 
     <script>
         let timeLeft;
@@ -215,6 +327,7 @@
         let scores = [];
         let totalScore = 0;
         let hintUsed = false;
+let timeSoundPlayed = false;
 
         const correctSound = document.getElementById("correctSound");
         const wrongSound = document.getElementById("wrongSound");
@@ -293,7 +406,11 @@
             timerInterval = setInterval(() => {
                 if (!isPaused) {
                     timeLeft--;
-                    document.getElementById("time").textContent = timeLeft;
+                    if (timeLeft === 10 && !timeSoundPlayed) {
+  document.getElementById("timeUpSound").play().catch(() => {});
+  timeSoundPlayed = true;
+}
+document.getElementById("time").textContent = timeLeft;
                     document.getElementById("timeProgress").value = timeLeft;
                     if (timeLeft === 0) {
                         clearInterval(timerInterval);
